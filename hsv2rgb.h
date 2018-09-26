@@ -7,6 +7,17 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+// hsv2rgb_lookup - convert a hue, saturation, and value to RGB
+//                   using a manually-tuned lookup table).
+//                   This yields ultimate control!
+//
+//                   NOTE: here hue is 0-255, not just 0-191
+
+void hsv2rgb_lookup( const struct CHSV& hsv, struct CRGB& rgb);
+void hsv2rgb_lookup( const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
+#define HUE_MAX_RAINBOW 255
+
+
 // hsv2rgb_rainbow - convert a hue, saturation, and value to RGB
 //                   using a visually balanced rainbow (vs a straight
 //                   mathematical spectrum).

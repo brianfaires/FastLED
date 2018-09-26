@@ -494,6 +494,79 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     rgb.b = b;
 }
 
+const uint8_t hsv2rgb_lookupTableR[] = {};
+const uint8_t hsv2rgb_lookupTableG[] = {};
+const uint8_t hsv2rgb_lookupTableB[] = {};
+void hsv2rgb_lookup( const CHSV& hsv, CRGB& rgb)
+{
+    // Use a lookup table to manually assign hue
+	uint8_t r = pgm_read_byte(&hsv2rgb_lookupTableR[hsv.hue]);
+	uint8_t g = pgm_read_byte(&hsv2rgb_lookupTableG[hsv.hue]);
+	uint8_t b = pgm_read_byte(&hsv2rgb_lookupTableB[hsv.hue]);
+	
+    uint8_t sat = hsv.sat;
+    uint8_t val = hsv.val;
+    
+    
+    // Scale down colors if we're desaturated at all
+    // and add the brightness_floor to r, g, and b.
+    if( sat != 255 ) {
+        if( sat == 0) {
+            rgb = CRGB(255,255,255);
+        } else {
+            //nscale8x3_video( r, g, b, sat);
+#if (FASTLED_SCALE8_FIXED==1)
+            if( r ) r = scale8_LEAVING_R1_DIRTY( r, sat);
+            if( g ) g = scale8_LEAVING_R1_DIRTY( g, sat);
+            if( b ) b = scale8_LEAVING_R1_DIRTY( b, sat);
+#else
+            if( r ) r = scale8_LEAVING_R1_DIRTY( r, sat) + 1;
+            if( g ) g = scale8_LEAVING_R1_DIRTY( g, sat) + 1;
+            if( b ) b = scale8_LEAVING_R1_DIRTY( b, sat) + 1;
+#endif
+            cleanup_R1();
+            
+            uint8_t desat = 255 - sat;
+            desat = scale8( desat, desat);
+            
+            uint8_t brightness_floor = desat;
+            r += brightness_floor;
+            g += brightness_floor;
+            b += brightness_floor;
+        }
+    }
+    
+    // Now scale everything down if we're at value < 255.
+    if( val != 255 ) {
+        
+        val = scale8_video_LEAVING_R1_DIRTY( val, val);
+        if( val == 0 ) {
+            r=0; g=0; b=0;
+        } else {
+            // nscale8x3_video( r, g, b, val);
+#if (FASTLED_SCALE8_FIXED==1)
+            if( r ) r = scale8_LEAVING_R1_DIRTY( r, val);
+            if( g ) g = scale8_LEAVING_R1_DIRTY( g, val);
+            if( b ) b = scale8_LEAVING_R1_DIRTY( b, val);
+#else
+            if( r ) r = scale8_LEAVING_R1_DIRTY( r, val) + 1;
+            if( g ) g = scale8_LEAVING_R1_DIRTY( g, val) + 1;
+            if( b ) b = scale8_LEAVING_R1_DIRTY( b, val) + 1;
+#endif
+            cleanup_R1();
+        }
+    }
+    
+    // Here we have the old AVR "missing std X+n" problem again
+    // It turns out that fixing it winds up costing more than
+    // not fixing it.
+    // To paraphrase Dr Bronner, profile! profile! profile!
+    //asm volatile(  ""  :  :  : "r26", "r27" );
+    //asm volatile (" movw r30, r26 \n" : : : "r30", "r31");
+    rgb.r = r;
+    rgb.g = g;
+    rgb.b = b;
+}
 
 void hsv2rgb_raw(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
     for(int i = 0; i < numLeds; i++) {
@@ -510,6 +583,12 @@ void hsv2rgb_rainbow( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) 
 void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
     for(int i = 0; i < numLeds; i++) {
         hsv2rgb_spectrum(phsv[i], prgb[i]);
+    }
+}
+
+void hsv2rgb_lookup( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
+    for(int i = 0; i < numLeds; i++) {
+        hsv2rgb_lookup(phsv[i], prgb[i]);
     }
 }
 

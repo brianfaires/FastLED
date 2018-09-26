@@ -18,6 +18,7 @@ struct CHSV;
 /// Forward declaration of hsv2rgb_rainbow here,
 /// to avoid circular dependencies.
 extern void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb);
+extern void hsv2rgb_lookup( const CHSV& hsv, CRGB& rgb);
 
 /// Representation of an HSV pixel (hue, saturation, value (aka brightness)).
 struct CHSV {
@@ -160,7 +161,8 @@ struct CRGB {
     /// allow construction from HSV color
 	inline CRGB(const CHSV& rhs) __attribute__((always_inline))
     {
-        hsv2rgb_rainbow( rhs, *this);
+		hsv2rgb_rainbow( rhs, *this);
+        //hsv2rgb_lookup( rhs, *this);
     }
 
     /// allow assignment from one RGB struct to another
@@ -194,6 +196,7 @@ struct CRGB {
 	inline CRGB& setHSV (uint8_t hue, uint8_t sat, uint8_t val) __attribute__((always_inline))
     {
         hsv2rgb_rainbow( CHSV(hue, sat, val), *this);
+        //hsv2rgb_lookup( CHSV(hue, sat, val), *this);
         return *this;
     }
 
@@ -201,6 +204,7 @@ struct CRGB {
 	inline CRGB& setHue (uint8_t hue) __attribute__((always_inline))
     {
         hsv2rgb_rainbow( CHSV(hue, 255, 255), *this);
+        //hsv2rgb_lookup( CHSV(hue, 255, 255), *this);
         return *this;
     }
 
@@ -208,6 +212,7 @@ struct CRGB {
 	inline CRGB& operator= (const CHSV& rhs) __attribute__((always_inline))
     {
         hsv2rgb_rainbow( rhs, *this);
+        //hsv2rgb_lookup( rhs, *this);
         return *this;
     }
 
