@@ -42,6 +42,19 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
+CLEDController &CFastLED::addLeds(CLEDController *pLed,
+									   struct CRGB *data,
+									   int nLedsOrOffset, int nLedsIfOffset,
+									   uint8_t* data_b, const struct CRGB *colorCorrections, uint8_t* globalBrightness,
+									   const uint8_t* gammaDim, const uint8_t* gammaDim_5bit) {
+
+	pLed->setColorCorrectionMatrix(colorCorrections);
+	pLed->setGlobalBrightness(globalBrightness);
+	pLed->setDimmingMatrices(gammaDim, gammaDim_5bit);
+	return addLeds(pLed, data, nLedsOrOffset, nLedsIfOffset);
+}
+
+
 void CFastLED::show(uint8_t scale) {
 	// guard against showing too rapidly
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
