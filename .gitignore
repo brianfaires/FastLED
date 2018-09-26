@@ -1,2 +1,5 @@
 html/
 *.gch
+/docs/
+/examples/
+/extras/
