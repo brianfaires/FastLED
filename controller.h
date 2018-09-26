@@ -40,10 +40,15 @@ class CLEDController {
 protected:
     friend class CFastLED;
     CRGB *m_Data;
+	uint8_t *m_Data_b;
+	uint8_t *m_globalBrightness;
+	const CRGB *m_colorCorrections;
+	const uint8_t* m_gammaDim;
+	const uint8_t* m_gammaDim_5bit;
     CLEDController *m_pNext;
-    CRGB m_ColorCorrection;
-    CRGB m_ColorTemperature;
-    EDitherMode m_DitherMode;
+    CRGB m_ColorCorrection; // debug: deprecate
+    CRGB m_ColorTemperature; // debug: deprecate
+    EDitherMode m_DitherMode; // debug: deprecate
     int m_nLeds;
     static CLEDController *m_pHead;
     static CLEDController *m_pTail;
@@ -52,13 +57,13 @@ protected:
     ///@param data the crgb color to set the leds to
     ///@param nLeds the numner of leds to set to this color
     ///@param scale the rgb scaling value for outputting color
-    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) = 0;
+    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale, uint8_t *data_b) = 0;
 
 	/// write the passed in rgb data out to the leds managed by this controller
 	///@param data the rgb data to write out to the strip
 	///@param nLeds the number of leds being written out
 	///@param scale the rgb scaling to apply to each led before writing it out
-    virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
+    virtual void show(const struct CRGB *data, int nLeds, CRGB scale, uint8_t *data_b) = 0;
 
 public:
 	/// create an led controller object, add it to the chain of controllers
@@ -73,11 +78,11 @@ public:
 	virtual void init() = 0;
 
 	///clear out/zero out the given number of leds.
-	virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black); }
+	virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black, m_Data_b); }
 
     /// show function w/integer brightness, will scale for color correction and temperature
-    void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
-        show(data, nLeds, getAdjustment(brightness));
+    void show(const struct CRGB *data, int nLeds, uint8_t brightness, uint8_t *data_b) {
+        show(data, nLeds, getAdjustment(brightness), data_b);
     }
 
     /// show function w/integer brightness, will scale for color correction and temperature
@@ -87,7 +92,7 @@ public:
 
     /// show function using the "attached to this controller" led data
     void showLeds(uint8_t brightness=255) {
-        show(m_Data, m_nLeds, getAdjustment(brightness));
+        show(m_Data, m_nLeds, getAdjustment(brightness), m_Data_b);
     }
 
 	/// show the given color on the led strip
@@ -107,6 +112,13 @@ public:
         return *this;
     }
 
+	CLEDController & setLeds(CRGB* data, int nLeds, uint8_t* data_b) {
+		m_Data = data;
+        m_nLeds = nLeds;
+		m_Data_b = data_b;
+        return *this;
+    }
+
 	/// zero out the led data managed by this controller
     void clearLedData() {
         if(m_Data) {
@@ -123,6 +135,15 @@ public:
     /// Reference to the n'th item in the controller
     CRGB &operator[](int x) { return m_Data[x]; }
 
+	CLEDController & setColorCorrectionMatrix(const struct CRGB* correction) { m_colorCorrections = correction; return *this; }
+	const struct CRGB* getColorCorrectionMatrix() { return m_colorCorrections; }
+    CLEDController & setGlobalBrightness(uint8_t* globalBrightness) { m_globalBrightness = globalBrightness; return *this; }
+    uint8_t getGlobalBrightness() { return *m_globalBrightness; }
+	
+	CLEDController & setDimmingMatrices(const uint8_t* gammaDim, const uint8_t* gammaDim_5bit) {
+		m_gammaDim = gammaDim;
+		m_gammaDim_5bit = gammaDim_5bit;
+	}
 	/// set the dithering mode for this controller to use
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
     /// get the dithering option currently set for this controller
@@ -388,24 +409,24 @@ struct PixelController {
 
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
 protected:
-  virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
+  virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels, uint8_t *data_b) = 0;
 
   /// set all the leds on the controller to a given color
   ///@param data the crgb color to set the leds to
   ///@param nLeds the numner of leds to set to this color
   ///@param scale the rgb scaling value for outputting color
-  virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
+  virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale, uint8_t *data_b) {
     PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
-    showPixels(pixels);
+    showPixels(pixels, data_b);
   }
 
 /// write the passed in rgb data out to the leds managed by this controller
 ///@param data the rgb data to write out to the strip
 ///@param nLeds the number of leds being written out
 ///@param scale the rgb scaling to apply to each led before writing it out
-  virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
+  virtual void show(const struct CRGB *data, int nLeds, CRGB scale, uint8_t *data_b) {
     PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
-    showPixels(pixels);
+    showPixels(pixels, data_b);
   }
 
 public:
