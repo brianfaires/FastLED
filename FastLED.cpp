@@ -30,17 +30,6 @@ CFastLED::CFastLED() {
 	m_nPowerData = 0xFFFFFFFF;
 }
 
-CLEDController &CFastLED::addLeds(CLEDController *pLed,
-									   struct CRGB *data,
-									   int nLedsOrOffset, int nLedsIfOffset) {
-	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
-	int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
-
-	pLed->init();
-	pLed->setLeds(data + nOffset, nLeds);
-	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
-	return *pLed;
-}
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
 									   struct CRGB *data,
@@ -48,10 +37,19 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 									   uint8_t* data_b, const struct CRGB *colorCorrections, uint8_t* globalBrightness,
 									   const uint8_t* gammaDim, const uint8_t* gammaDim_5bit) {
 
-	pLed->setColorCorrectionMatrix(colorCorrections);
-	pLed->setGlobalBrightness(globalBrightness);
-	pLed->setDimmingMatrices(gammaDim, gammaDim_5bit);
-	return addLeds(pLed, data, nLedsOrOffset, nLedsIfOffset);
+	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
+	int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
+
+	pLed->init();
+	if(colorCorrections) { pLed->setColorCorrectionMatrix(colorCorrections); }
+	if(globalBrightness) { pLed->setGlobalBrightness(globalBrightness); }
+	if(gammaDim && gammaDim_5bit) { pLed->setDimmingMatrices(gammaDim, gammaDim_5bit); }
+	pLed->setLeds(data + nOffset, nLeds, data_b);
+	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
+	//if(colorCorrections != NULL) { pLed->setColorCorrectionMatrix(colorCorrections); }
+	//if(globalBrightness != NULL) { pLed->setGlobalBrightness(globalBrightness); }
+	//if((gammaDim != NULL) && (gammaDim_5bit != NULL)) { pLed->setDimmingMatrices(gammaDim, gammaDim_5bit); }
+	return *pLed;
 }
 
 
