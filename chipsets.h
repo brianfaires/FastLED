@@ -197,6 +197,7 @@ protected:
 			uint8_t brightness_5bit = pgm_read_byte(&this->m_gammaDim_5bit[pixelBrightness]);
 			uint8_t scaling = pgm_read_byte(&this->m_gammaDim[pixelBrightness]);
 			//Serial.println(String(curLED) + ": " + String(brightness_5bit) + ", " + String(scaling));
+			if(pixels.loadAndScale0() == 0 && pixels.loadAndScale1() == 0 && pixels.loadAndScale2() == 0) { brightness_5bit = 0; } // debug: workaround for FASTLED bug
 			
 #ifdef FASTLED_SPI_BYTE_ONLY
 			prefix = 0xE0 | brightness_5bit;
