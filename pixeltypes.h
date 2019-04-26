@@ -39,6 +39,10 @@ struct CHSV {
 		uint8_t raw[3];
 	};
 
+	String ToString() {
+		return "HSV(" + String(h) + ", " + String(s) + ", " + String(v) + ")";
+	}
+	
     /// default values are UNITIALIZED
     inline CHSV() __attribute__((always_inline))
     {
@@ -107,6 +111,11 @@ struct CRGB {
 		uint8_t raw[3];
 	};
 
+
+	String ToString() {
+		return "CRGB(" + String(r) + ", " + String(g) + ", " + String(b) + ")";
+	}
+	
   /// Array access operator to index into the crgb object
 	inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
     {
