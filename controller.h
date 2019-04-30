@@ -140,7 +140,7 @@ public:
     CLEDController & setGlobalBrightness(uint8_t* globalBrightness) { m_globalBrightness = globalBrightness; return *this; }
     uint8_t getGlobalBrightness() { return *m_globalBrightness; }
 	
-	CLEDController & setDimmingMatrices(const uint8_t* gammaDim, const uint8_t* gammaDim_5bit) {
+	void setDimmingMatrices(const uint8_t* gammaDim, const uint8_t* gammaDim_5bit) {
 		m_gammaDim = gammaDim;
 		m_gammaDim_5bit = gammaDim_5bit;
 	}

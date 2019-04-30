@@ -494,6 +494,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     rgb.b = b;
 }
 
+#if 0
 const uint8_t hsv2rgb_lookupTableR[] = {};
 const uint8_t hsv2rgb_lookupTableG[] = {};
 const uint8_t hsv2rgb_lookupTableB[] = {};
@@ -567,6 +568,7 @@ void hsv2rgb_lookup( const CHSV& hsv, CRGB& rgb)
     rgb.g = g;
     rgb.b = b;
 }
+#endif
 
 void hsv2rgb_raw(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
     for(int i = 0; i < numLeds; i++) {
