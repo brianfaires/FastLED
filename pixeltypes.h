@@ -43,6 +43,18 @@ struct CHSV {
 		return "HSV(" + String(h) + ", " + String(s) + ", " + String(v) + ")";
 	}
 	
+	/// Array access operator to index into the chsv object
+	inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
+    {
+        return raw[x];
+    }
+
+    /// Array access operator to index into the chsv object
+    inline const uint8_t& operator[] (uint8_t x) const __attribute__((always_inline))
+    {
+        return raw[x];
+    }
+
     /// default values are UNITIALIZED
     inline CHSV() __attribute__((always_inline))
     {
@@ -492,7 +504,7 @@ struct CRGB {
         uint8_t max = red;
         if( green > max) max = green;
         if( blue > max) max = blue;
-        
+
         // stop div/0 when color is black
         if(max > 0) {
             uint16_t factor = ((uint16_t)(limit) * 256) / max;
