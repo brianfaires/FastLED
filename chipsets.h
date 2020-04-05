@@ -222,15 +222,6 @@ public:
 
 protected:
 
-	static inline uint8_t applyCorrection(uint8_t value, uint8_t colCorrection, uint8_t scale) {
-		if(value == 0) { return 0; }
-		uint32_t work = (((uint32_t)colCorrection)+1) * ((uint32_t)scale + 1) * value;
-		work /= 0x10000L;
-		uint8_t retVal = work & 0xFF;
-		return retVal == 0 ? 1 : retVal;
-    }
-    
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels, uint8_t *data_b) {
 		uint16_t prefix;
 		mSPI.select();
@@ -239,27 +230,23 @@ protected:
 		uint16_t curLED = 0;
 		
 		while(pixels.has(1)) {
-			uint8_t pixelBrightness = scale8_video(data_b[curLED], this->getGlobalBrightness());
-			//Serial.println(String(curLED) + ": " + String(pixelBrightness) + ", " + String(data_b[curLED]) + ", " + String(this->getGlobalBrightness()));
-			uint8_t brightness_5bit = pgm_read_byte(&this->m_gammaDim_5bit[pixelBrightness]);
-			uint8_t scaling = pgm_read_byte(&this->m_gammaDim[pixelBrightness]);
-			//Serial.println(String(curLED) + ": " + String(brightness_5bit) + ", " + String(scaling));
+			uint8_t brightness_5bit = data_b[curLED];
 			if(pixels.loadAndScale0() == 0 && pixels.loadAndScale1() == 0 && pixels.loadAndScale2() == 0) { brightness_5bit = 0; } // debug: workaround for FASTLED bug
 			
 #ifdef FASTLED_SPI_BYTE_ONLY
 			prefix = 0xE0 | brightness_5bit;
 			curLED++;
 			mSPI.writeByte((uint8_t)prefix);
-			mSPI.writeByte(applyCorrection(pixels.loadAndScale0(), this->m_colorCorrections[brightness_5bit].b), scaling);
-			mSPI.writeByte(applyCorrection(pixels.loadAndScale1(), this->m_colorCorrections[brightness_5bit].g), scaling);
-			mSPI.writeByte(applyCorrection(pixels.loadAndScale2(), this->m_colorCorrections[brightness_5bit].r), scaling);
+			mSPI.writeByte(pixels.loadAndScale0());
+			mSPI.writeByte(pixels.loadAndScale1());
+			mSPI.writeByte(pixels.loadAndScale2());
 #else
 			prefix = 0xE000 | (brightness_5bit << 8);
 			curLED++;
-			uint16_t b = prefix | (uint16_t)applyCorrection(pixels.loadAndScale0(), this->m_colorCorrections[brightness_5bit].b, scaling);
+			uint16_t b = prefix | pixels.loadAndScale0();
 			mSPI.writeWord(b);
-			uint16_t w = applyCorrection(pixels.loadAndScale1(), this->m_colorCorrections[brightness_5bit].g, scaling) << 8;
-			w |= applyCorrection(pixels.loadAndScale2(), this->m_colorCorrections[brightness_5bit].r, scaling);
+			uint16_t w = pixels.loadAndScale1() << 8;
+			w |= pixels.loadAndScale2();
 			mSPI.writeWord(w);
 #endif
 			pixels.stepDithering();

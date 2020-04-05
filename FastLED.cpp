@@ -33,22 +33,14 @@ CFastLED::CFastLED() {
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
 									   struct CRGB *data,
-									   int nLedsOrOffset, int nLedsIfOffset,
-									   uint8_t* data_b, const struct CRGB *colorCorrections, uint8_t* globalBrightness,
-									   const uint8_t* gammaDim, const uint8_t* gammaDim_5bit) {
+									   int nLedsOrOffset, int nLedsIfOffset, uint8_t* data_b) {
 
 	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 	int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 
 	pLed->init();
-	if(colorCorrections) { pLed->setColorCorrectionMatrix(colorCorrections); }
-	if(globalBrightness) { pLed->setGlobalBrightness(globalBrightness); }
-	if(gammaDim && gammaDim_5bit) { pLed->setDimmingMatrices(gammaDim, gammaDim_5bit); }
 	pLed->setLeds(data + nOffset, nLeds, data_b);
 	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
-	//if(colorCorrections != NULL) { pLed->setColorCorrectionMatrix(colorCorrections); }
-	//if(globalBrightness != NULL) { pLed->setGlobalBrightness(globalBrightness); }
-	//if((gammaDim != NULL) && (gammaDim_5bit != NULL)) { pLed->setDimmingMatrices(gammaDim, gammaDim_5bit); }
 	return *pLed;
 }
 
@@ -143,22 +135,6 @@ void CFastLED::delay(unsigned long ms) {
 		yield();
 	}
 	while((millis()-start) < ms);
-}
-
-void CFastLED::setTemperature(const struct CRGB & temp) {
-	CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-		pCur->setTemperature(temp);
-		pCur = pCur->next();
-	}
-}
-
-void CFastLED::setCorrection(const struct CRGB & correction) {
-	CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-		pCur->setCorrection(correction);
-		pCur = pCur->next();
-	}
 }
 
 void CFastLED::setDither(uint8_t ditherMode)  {

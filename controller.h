@@ -41,14 +41,10 @@ protected:
     friend class CFastLED;
     CRGB *m_Data;
 	uint8_t *m_Data_b;
-	uint8_t *m_globalBrightness;
-	const CRGB *m_colorCorrections;
-	const uint8_t* m_gammaDim;
-	const uint8_t* m_gammaDim_5bit;
     CLEDController *m_pNext;
-    CRGB m_ColorCorrection; // debug: deprecate
-    CRGB m_ColorTemperature; // debug: deprecate
-    EDitherMode m_DitherMode; // debug: deprecate
+    CRGB m_ColorCorrection; // todo: debug: deprecate
+    CRGB m_ColorTemperature; // todo: debug: deprecate
+    EDitherMode m_DitherMode; // todo: debug: deprecate
     int m_nLeds;
     static CLEDController *m_pHead;
     static CLEDController *m_pTail;
@@ -135,34 +131,12 @@ public:
     /// Reference to the n'th item in the controller
     CRGB &operator[](int x) { return m_Data[x]; }
 
-	CLEDController & setColorCorrectionMatrix(const struct CRGB* correction) { m_colorCorrections = correction; return *this; }
-	const struct CRGB* getColorCorrectionMatrix() { return m_colorCorrections; }
-    CLEDController & setGlobalBrightness(uint8_t* globalBrightness) { m_globalBrightness = globalBrightness; return *this; }
-    uint8_t getGlobalBrightness() { return *m_globalBrightness; }
-	
-	void setDimmingMatrices(const uint8_t* gammaDim, const uint8_t* gammaDim_5bit) {
-		m_gammaDim = gammaDim;
-		m_gammaDim_5bit = gammaDim_5bit;
-	}
 	/// set the dithering mode for this controller to use
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
     /// get the dithering option currently set for this controller
     inline uint8_t getDither() { return m_DitherMode; }
 
-	/// the the color corrction to use for this controller, expressed as an rgb object
-    CLEDController & setCorrection(CRGB correction) { m_ColorCorrection = correction; return *this; }
-    /// set the color correction to use for this controller
-    CLEDController & setCorrection(LEDColorCorrection correction) { m_ColorCorrection = correction; return *this; }
-    /// get the correction value used by this controller
-    CRGB getCorrection() { return m_ColorCorrection; }
-
-	/// set the color temperature, aka white point, for this controller
-    CLEDController & setTemperature(CRGB temperature) { m_ColorTemperature = temperature; return *this; }
-    /// set the color temperature, aka white point, for this controller
-    CLEDController & setTemperature(ColorTemperature temperature) { m_ColorTemperature = temperature; return *this; }
-    /// get the color temperature, aka whipe point, for this controller
-    CRGB getTemperature() { return m_ColorTemperature; }
-
+	
 	/// Get the combined brightness/color adjustment for this controller
     CRGB getAdjustment(uint8_t scale) {
         return computeAdjustment(scale, m_ColorCorrection, m_ColorTemperature);

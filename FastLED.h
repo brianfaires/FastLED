@@ -198,7 +198,7 @@ public:
 	/// @param nLedsOrOffset - number of leds (3 argument version) or offset into the data array
 	/// @param nLedsIfOffset - number of leds (4 argument version)
 	/// @returns a reference to the added controller
-	static CLEDController &addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset, uint8_t* data_b, const struct CRGB *colorCorrections, uint8_t *globalBrightness, const uint8_t* gammaDim, const uint8_t* gammaDim_5bit);
+	static CLEDController &addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset, uint8_t* data_b);
 	static CLEDController &addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
 
 	/// @name Adding SPI based controllers
@@ -221,9 +221,9 @@ public:
 	/// @tparam RGB_ORDER - the rgb ordering for the leds (e.g. what order red, green, and blue data is written out in)
 	/// @tparam SPI_DATA_RATE - the data rate to drive the SPI clock at, defined using DATA_RATE_MHZ or DATA_RATE_KHZ macros
 	/// @returns a reference to the added controller
-	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint32_t SPI_DATA_RATE> CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0, uint8_t* data_b = NULL, const struct CRGB *colorCorrections = NULL, uint8_t *globalBrightness = NULL, const uint8_t* gammaDim = NULL, const uint8_t* gammaDim_5bit = NULL) {
+	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint32_t SPI_DATA_RATE> CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0, uint8_t* data_b = NULL) {
 		switch(CHIPSET) {
-			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset, data_b, colorCorrections, globalBrightness, gammaDim, gammaDim_5bit); }
+			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset, data_b); }
 		}
 	}
 
